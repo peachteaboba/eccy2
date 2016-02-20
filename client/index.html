@@ -1,0 +1,160 @@
+<html ng-app="eccy_app">
+<head>
+    <title>Eccy</title>
+    <link rel='stylesheet' href='static/css/index.css'>
+    <link rel='stylesheet' href='static/css/reset.css'>
+    <link rel='stylesheet' href='static/css/hover/hover.css'>
+    <link href='https://fonts.googleapis.com/css?family=Autour+One' rel='stylesheet' type='text/css'>
+    <!-- require angular -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.5/angular.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.5/angular-route.min.js"></script>
+    <!-- load momentJS (required for angular-moment) -->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js"></script>
+    <!-- load angular-moment -->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular-moment/0.9.0/angular-moment.min.js"></script>
+    <script>
+        // PUT ANGULAR CODE HERE
+
+        // Let's create our angular module
+        var eccy_app = angular.module('eccy_app', ['angularMoment', 'ngRoute']);
+
+        //  use the config method to set up routing:
+        eccy_app.config(function ($routeProvider) {
+            $routeProvider
+                    .when('/admin',{
+                        templateUrl: 'static/partials/admin.html'
+                    })
+                    .when('/profile',{
+                        templateUrl: 'static/partials/profile.html'
+                    })
+                    .when('/play',{
+                        templateUrl: 'static/partials/play.html'
+                    })
+                    .otherwise({
+                        redirectTo: '/'
+                    });
+        });
+
+
+        // create the FriendFactory
+        eccy_app.factory('UserFactory', function($http) {
+            var factory = {};
+            var users = [];
+
+
+            //Restful syntax: index = get all that object
+            factory.index = function(callback) {
+                // Where do we get access to $http?
+                $http.get('/users').success(function(output) {
+                    users = output;
+                    callback(users);
+                })
+            };
+            // note the use of callbacks!
+
+
+            // Restful syntax: create = add one to that object
+            factory.create = function(info, callback) {
+
+//                console.log(info);
+
+
+                $http.post('/addUser', info).success( function(output) {
+
+
+
+                    users = output;
+                    callback(users);
+                });
+            };
+
+            // Restful syntax: delete = deletes a friend that has an _id from req(uest).params.id
+
+            factory.delete = function(id, callback) {
+                // info is the index to be deleted
+
+
+                $http.get('/user/'+ id +'/delete').success( function(output) {
+                    users = output;
+                    callback(users);
+                });
+            };
+
+
+
+            return factory;
+        });
+
+
+
+        // Controller code!
+        eccy_app.controller('UsersController', function($scope, UserFactory) {
+            $scope.users = []; //  initialize an empty array so $scope.friends maintains a consistent data type
+
+
+            // run the index method and set $scope data in the callback
+            UserFactory.index(function(data) {
+                $scope.users = data;
+                // anything else that you want to happen after storing friends to $scope
+            });
+
+
+
+            $scope.addUser = function(input, validation) {
+
+                console.log(input);
+                console.log(validation);
+
+                if(validation == true) {
+                    UserFactory.create(input, function (data) {
+                        $scope.users = data;
+                        $scope.new_user = {};
+                    });
+
+                }
+                else{
+                    console.log("Form.. Y U No Validated??");
+                }
+
+
+
+            };
+
+            $scope.removeUser = function (id){
+
+//                console.log(id);
+
+                UserFactory.delete(id, function(data) {
+                    $scope.users = data;
+                });
+
+            }
+
+
+
+
+
+
+
+
+
+
+
+        });
+
+
+
+
+    </script>
+</head>
+<!-- everything in the body is going to use the friends controller (this gives us access to the friends controller $scope) -->
+<body ng-controller="UsersController">
+    <div class="header">
+        <a class="hvr-border-fade-orange hvr-buzz-out header-btn-admin" href="#/admin">::: Admin Console :::</a>
+        <a class="hvr-border-fade-blue hvr-buzz-out header-btn-profile" href="#/profile">Profile</a>
+        <a class="hvr-border-fade-green hvr-buzz-out header-btn" href="#/play">Play Game</a>
+    </div>
+    <div ng-view=""></div>
+
+</body>
+</html>

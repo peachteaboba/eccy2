@@ -1,0 +1,13 @@
+{
+  "name": "FullMean_Essy",
+  "version": "0.0.1",
+  "description": "Multiplayer dot eating game",
+  "main": "server.js",
+  "author": "peachteaboba",
+  "dependencies": {
+    "body-parser": "latest",
+    "express": "latest",
+    "mongoose": "latest",
+    "socket.io": "latest"
+  }
+}
